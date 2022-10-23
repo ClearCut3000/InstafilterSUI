@@ -8,8 +8,13 @@
 import PhotosUI
 import SwiftUI
 
+#warning("Step 1: Create a view controller for image picker as struct to wrap a UIViewController in a SwiftUI view")
+
 struct ImagePicker: UIViewControllerRepresentable {
 
+#warning("Step 3: Create a coordinator class between the structure and the UIKit PHPickerViewController")
+
+  ///  Make shure that Coordinator is conforming NSObject (a base class for all UIKit) and PHPickerViewControllerDelegate with all needed methods implementation!
   //MARK: - Coordinator
   class Coordinator: NSObject, PHPickerViewControllerDelegate {
 
@@ -35,14 +40,21 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
   }
 
+  //MARK: - Properties
+  /// Allows  to create a binding from ImagePicker up to whatever created it
   @Binding var image: UIImage?
 
+#warning("Step 2: Conform to UIViewControllerRepresentable")
+  /// To conform UIViewControllerRepresentable use typealias UIViewControllerType = PHPickerViewController
   //MARK: - PHPickerViewController
   func makeUIViewController(context: Context) -> PHPickerViewController {
     var config = PHPickerConfiguration()
     config.filter = .images
 
     let picker = PHPickerViewController(configuration: config)
+
+#warning("Step4:  Tell the PHPickerViewController that when something happens it should tell our coordinator by making coordinatar a delegate")
+
     picker.delegate = context.coordinator
     return picker
   }
@@ -50,6 +62,8 @@ struct ImagePicker: UIViewControllerRepresentable {
   func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {
 
   }
+
+#warning("Step4: Implement specific methodfor Coordinator,  which SwiftUI will automatically call")
 
   func makeCoordinator() -> Coordinator {
     Coordinator(self)
