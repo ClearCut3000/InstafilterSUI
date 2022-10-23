@@ -23,6 +23,10 @@ struct InstafilterMainView: View {
   @State private var currentFilter: CIFilter = CIFilter.sepiaTone()
   @State private var showingFilterSheet = false
   @State private var processedImage: UIImage?
+  @State private var filterName = "Change filter"
+  @State private var isShowingAlert = false
+  @State private var message = ""
+  @State private var errorText = ""
 
   private var isSaveInactive: Bool {
     if image != nil { return false }
@@ -119,7 +123,7 @@ struct InstafilterMainView: View {
             }
           }
           HStack {
-            Button("Change filter") {
+            Button("\(filterName)") {
               showingFilterSheet = true
             }
             Spacer()
@@ -128,6 +132,9 @@ struct InstafilterMainView: View {
           }
         }
         .padding([.horizontal, .bottom])
+        .alert("\(message)", isPresented: $isShowingAlert) {
+          Text("\(errorText)")
+        }
       }
       .navigationTitle("Instafilter")
       .onChange(of: inputImage) { _ in loadImage() }
@@ -141,12 +148,11 @@ struct InstafilterMainView: View {
         Button("Unsharp Mask") { setFilter(CIFilter.unsharpMask()) }
         Button("Vignette") { setFilter(CIFilter.vignette()) }
         Button("Vibrance") { setFilter(CIFilter.vibrance()) }
-        Button("Gloom") { setFilter(CIFilter.gloom()) }
+        Button("Gloom") {  setFilter(CIFilter.gloom()) }
         Button("Cancel", role: .cancel) { }
       }
     }
   }
-
 
   //MARK: - View Methods
   func loadImage() {
@@ -160,10 +166,13 @@ struct InstafilterMainView: View {
     guard let processedImage else { return }
     let imageSaver = ImageSaver()
     imageSaver.successHandler = {
-      print("Success!")
+      message = "Success!"
+      isShowingAlert = true
     }
     imageSaver.errorHandler = {
-      print("Oops! \($0.localizedDescription)")
+      message = "Oops!"
+      errorText = "\($0.localizedDescription)"
+      isShowingAlert = true
     }
     imageSaver.writeToPhotoAlbum(image: processedImage)
   }
@@ -190,6 +199,7 @@ struct InstafilterMainView: View {
 
   func setFilter(_ filter: CIFilter) {
     currentFilter = filter
+    filterName = String(filter.name.dropFirst(2))
     loadImage()
   }
 }
